@@ -1,0 +1,15 @@
+---
+# mariadb
+mysql_root_password: "mysql_root_password"
+mysql_db: "ojs_db"
+mysql_user: "ojs_user"
+mysql_password: "ojs_password"
+
+# apache
+usuario_apache: www-data
+grupo_apache: www-data
+
+# ojs
+ojs_url: https://pkp.sfu.ca/ojs/download/ojs-3.3.0-14.tar.gz
+ojs_origen: /var/www/html/ojs-3.3.0-14/
+ojs_destino: /var/www/html/openjournal/

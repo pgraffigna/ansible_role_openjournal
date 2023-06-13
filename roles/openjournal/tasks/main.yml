@@ -1,0 +1,34 @@
+---
+- name: Incluye el archivo con las variables
+  ansible.builtin.include_vars:
+    file: vars_main.yml
+
+- name: Creando directorio para subida de archivos
+  ansible.builtin.file:
+    path: /var/www/files
+    state: directory
+    owner: "{{ usuario_apache }}"
+    group: "{{ grupo_apache }}"
+    mode: 0755
+
+- name: Descarga y descomprime openjournal
+  ansible.builtin.unarchive:
+    src: "{{ ojs_url }}"
+    dest: /var/www/html/
+    remote_src: true
+
+- name: Renombrar carpeta "{{ ojs_origen }}" a "{{ ojs_destino }}"
+  ansible.builtin.copy:
+    src: "{{ ojs_origen }}"
+    dest: "{{ ojs_destino }}"
+    owner: "{{ usuario_apache }}"
+    group: "{{ grupo_apache }}"
+    mode: 0755
+    remote_src: true
+  notify: servicios_apache
+
+- name: Eliminar carpeta "{{ ojs_origen }}"
+  ansible.builtin.file:
+    path: "{{ ojs_origen }}"
+    state: absent
+

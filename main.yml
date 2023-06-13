@@ -1,0 +1,9 @@
+---
+- hosts: openjournal
+  become: true
+  gather_facts: true
+
+  roles:
+    - { role: mariadb, tags: [ 'mariadb' ] }
+    - { role: apache2, tags: [ 'apache2' ] }
+    - { role: openjournal, tags: [ 'openjournal' ] }
