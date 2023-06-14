@@ -1,0 +1,21 @@
+---
+- name: Incluye el archivo con las variables
+  ansible.builtin.include_vars:
+    file: vars_main.yml
+
+- name: Importar dump de la db
+  community.mysql.mysql_db:
+    name: "{{ mysql_db }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: import
+    target: "/tmp/{{ backup_db }}"
+
+- name: Migrar sitio
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ backup_sitio }}"
+    dest: /var/www/html/
+    owner: "{{ usuario_apache }}"
+    group: "{{ grupo_apache }}"
+    remote_src: true
+  notify: servicios_apache

@@ -5,30 +5,22 @@
 
 - name: Creando directorio para subida de archivos
   ansible.builtin.file:
-    path: /var/www/files
+    path: "{{ item }}"
     state: directory
     owner: "{{ usuario_apache }}"
     group: "{{ grupo_apache }}"
     mode: 0755
+  with_items: [ '/var/www/files', '/var/www/html/openjournal' ]
 
 - name: Descarga y descomprime openjournal
   ansible.builtin.unarchive:
     src: "{{ ojs_url }}"
-    dest: /var/www/html/
-    remote_src: true
-
-- name: Renombrar carpeta "{{ ojs_origen }}" a "{{ ojs_destino }}"
-  ansible.builtin.copy:
-    src: "{{ ojs_origen }}"
-    dest: "{{ ojs_destino }}"
+    dest: /var/www/html/openjournal
     owner: "{{ usuario_apache }}"
     group: "{{ grupo_apache }}"
     mode: 0755
     remote_src: true
+    extra_opts: --strip-components=1
   notify: servicios_apache
 
-- name: Eliminar carpeta "{{ ojs_origen }}"
-  ansible.builtin.file:
-    path: "{{ ojs_origen }}"
-    state: absent
 
