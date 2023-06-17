@@ -2,17 +2,18 @@
 apache_packages: [ 'apache2', 'apache2-utils', 'software-properties-common' ]
 
 php_packages:
-  - php
-  - libapache2-mod-php
-  - php-cli
-  - php-fpm
-  - php-json
-  - php-pdo
-  - php-mysql
-  - php-zip
-  - php-gd
-  - php-mbstring
-  - php-curl
-  - php-xml
-  - php-pear
-  - php-bcmath
+  - php7.4
+  - libapache2-mod-php7.4
+  - php7.4-cli
+  - php7.4-fpm
+  - php7.4-json
+  - php7.4-pdo
+  - php7.4-mysql
+  - php7.4-zip
+  - php7.4-gd
+  - php7.4-mbstring
+  - php7.4-curl
+  - php7.4-xml
+  - php7.4-bcmath
+
+

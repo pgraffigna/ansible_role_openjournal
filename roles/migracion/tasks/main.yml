@@ -3,6 +3,11 @@
   ansible.builtin.include_vars:
     file: vars_main.yml
 
+- name: Copiar dump de la db en remoto
+  ansible.builtin.copy:
+    src: "files/{{ backup_db }}"
+    dest: "/tmp/{{ backup_db}}"
+
 - name: Importar dump de la db
   community.mysql.mysql_db:
     name: "{{ mysql_db }}"
@@ -11,11 +16,85 @@
     state: import
     target: "/tmp/{{ backup_db }}"
 
-- name: Migrar sitio
+- name: Migrar files
   ansible.builtin.unarchive:
-    src: "/tmp/{{ backup_sitio }}"
-    dest: /var/www/html/
+    src: "files/{{ backup_files }}"
+    dest: /var/www/
     owner: "{{ usuario_apache }}"
     group: "{{ grupo_apache }}"
+    mode: 0777
+    
+- name: Creando directorio para "{{ sitio }}"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/{{ path_backup }}/"
+    state: directory
+  
+- name: Migrar "{{ sitio }}"
+  ansible.builtin.unarchive:
+    src: "files/{{ backup_sitio }}"
+    dest: "{{ ansible_env.HOME }}/{{ path_backup }}/"
+    extra_opts: --strip-components=1
+
+- name: Descarga y descomprime openjournal
+  ansible.builtin.unarchive:
+    src: "{{ ojs_3x_url }}"
+    dest: "{{ ansible_env.HOME }}"
     remote_src: true
+
+- name: Copiar config en nueva version de openjournal
+  ansible.builtin.copy:
+    src: "{{ ansible_env.HOME }}/{{ path_backup }}/config.inc.php"
+    dest: "{{ ansible_env.HOME }}/{{ path_app }}/config.inc.php"
+    remote_src: true
+
+- name: Fix para db en config
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/{{ path_app }}/config.inc.php"
+    regexp: '^driver = mysql'
+    line: driver = mysqli
+
+- name: Copiar configuracion de apache2
+  ansible.builtin.copy:
+    src: "files/{{ sitio }}.conf"
+    dest: "/etc/apache2/sites-enabled/{{ sitio }}.conf"
+
+- name: Copiar carpeta public de "{{ path_backup }}" a "{{ path_app }}"
+  ansible.builtin.copy:
+    src: "{{ ansible_env.HOME }}/{{ path_backup }}/public/"
+    dest: "{{ ansible_env.HOME }}/{{ path_app }}/public/"
+    remote_src: yes
+
+- name: Mover nueva version a destino
+  ansible.builtin.copy:
+    src: "{{ ansible_env.HOME }}/{{ path_app }}/"
+    dest: "/var/www/html/{{ sitio }}"
+    owner: www-data
+    group: www-data
+    mode: 0755
+    remote_src: yes
+
+- name: Cambiar permisos de carpeta cache
+  ansible.builtin.file:
+    path: "/var/www/html/{{ sitio }}/cache/"
+    state: directory
+    mode: 0777
+    recurse: yes
+
+- name: Registrar estado del upgrade
+  ansible.builtin.shell: "php -d memory_limit=2048M /var/www/html/{{ sitio }}/tools/upgrade.php check"   
+  register: upgrade_check
+
+- name: Chequear estado del upgrade
+  ansible.builtin.debug:
+    var: upgrade_check
+
+- name: Actualizar la version
+  ansible.builtin.shell: "php -d memory_limit=2048M /var/www/html/{{ sitio }}/tools/upgrade.php upgrade"
+  when: upgrade_check.rc == 0 
+  ignore_errors: true
   notify: servicios_apache
+
+- name: Enviar mensaje de error si algo falla
+  ansible.builtin.fail:
+    msg: "No se pudo ejecutar la actualizacion de openjournal"
+  when: upgrade_check.rc != 0       

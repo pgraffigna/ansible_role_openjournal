@@ -1,4 +1,10 @@
 ---
+- name: Activa php7.4
+  community.general.apache2_module:
+    name: php7.4
+    state: present
+  listen: servicios_apache
+  
 - name: Recargar Apache
   ansible.builtin.service:
     name: apache2
@@ -10,3 +16,5 @@
     name: apache2
     state: restarted
   listen: servicios_apache
+
+

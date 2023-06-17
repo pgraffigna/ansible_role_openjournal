@@ -1,17 +1,22 @@
 ---
 # mariadb
-mysql_root_password: "mysql_root_password"
-mysql_db: "ojs_db"
-mysql_user: "ojs_user"
-mysql_password: "ojs_password"
+mysql_root_password: mysql_root_password
+mysql_db: ojs_db  
+mysql_user: ojs_user
+mysql_password: ojs_pass
 
 # apache
 usuario_apache: www-data
 grupo_apache: www-data
+sitio: testing.lab
 
 # ojs
-ojs_url: https://pkp.sfu.ca/ojs/download/ojs-3.3.0-14.tar.gz
+ojs_2x_url: https://pkp.sfu.ca/ojs/download/ojs-2.4.8-5.tar.gz
+ojs_3x_url: https://pkp.sfu.ca/ojs/download/ojs-3.2.1-4.tar.gz
+path_backup: revistas_backup
+path_app: openjournal
 
 # migracion
-backup_db: backup.sql
-backup_sitio: sitio.tar.gz
+backup_db: ojs248-20230615-010001.sql
+backup_sitio: testing.lab.tar.gz
+backup_files: files.tar.gz
